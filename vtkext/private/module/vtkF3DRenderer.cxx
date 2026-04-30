@@ -3394,8 +3394,12 @@ void vtkF3DRenderer::ConfigureOpacityTransferFunction(vtkPiecewiseFunction* otf,
 void vtkF3DRenderer::ConfigureScalarBarActorForColoring(
   vtkScalarBarActor* scalarBar, std::string arrayName, int component, vtkColorTransferFunction* ctf)
 {
+  const std::string componentName = (this->DisplayDepth && this->DisplayDepthScalarColoring)
+    ? "Depth"
+    : this->ComponentToString(component);
+
   arrayName += " (";
-  arrayName += this->ComponentToString(component);
+  arrayName += componentName;
   arrayName += ")";
 
   scalarBar->SetLookupTable(ctf);
@@ -3453,8 +3457,9 @@ void vtkF3DRenderer::ConfigureRangeAndCTFForColoring(
     }
     else
     {
-      minRange = info.MagnitudeRange[0];
-      maxRange = info.MagnitudeRange[1];
+      const bool depthEnabled = this->DisplayDepth && this->DisplayDepthScalarColoring;
+      minRange = depthEnabled ? 0.0 : info.MagnitudeRange[0];
+      maxRange = depthEnabled ? 1.0 : info.MagnitudeRange[1];
     }
     if (this->ExpandingRangeSet)
     {
